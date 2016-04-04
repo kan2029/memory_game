@@ -72,10 +72,6 @@ var game = {
 		//Initializes the whole setup
 		startGame: function(isResumed){
 
-			setTimeout(function(){
-
-			}, 500);
-
 			if(!isResumed){
 				//clear local storage and table
 				if(typeof(Storage) !== 'undefined') {
@@ -132,6 +128,11 @@ var game = {
 				localStorage.setItem('cols', game.model.cols);
 				localStorage.setItem('gridCount', game.model.gridCount);
 				localStorage.setItem('distribution', game.model.distribution);
+			}
+
+			//firefox table overflow issue
+			if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1 && game.model.cols >=10){
+			    document.getElementsByClassName('tile-table')[0].classList.add('firefox-overflow');
 			}
 		},
 
