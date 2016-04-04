@@ -3,18 +3,16 @@
 <head>
 	<link rel="stylesheet" type="text/css" href="css/uc_assignment.css">
 </head>
-<body onload="game.controller.resume()">
+<body onload="game.controller.resume();game.controller.validateDimensions();">
 	<article id="main-wrapper">
 		<section id="user-input-wrapper">
-			<label>Enter grid dimension: </label>
-			<input type="number" class="grid-size"> x
-			<input type="number" class="grid-size">
-			<button onclick="game.controller.startGame()">Start</button>
+			<label>ENTER GRID DIMENSIONS</label><br>
+			<input type="number" class="grid-size" onchange="game.controller.validateDimensions()" onkeyup="game.controller.validateDimensions()"> X
+			<input type="number" class="grid-size" onchange="game.controller.validateDimensions()" onkeyup="game.controller.validateDimensions()"><br>
+			<button onclick="game.controller.startGame()" disabled="disabled" class="start-game">Play</button>
 		</section>
 		<section id="game-wrapper">
-			<section id="game-board">
-			</section>
-
+			<section id="game-board"></section>
 		</section>
 	</article>
 	<script type="text/javascript" src="js/uc_assignment.js"></script>

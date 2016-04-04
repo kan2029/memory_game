@@ -14,6 +14,18 @@ var game = {
 		revealedTemp: false,
 		revealedKeyTemp: null,
 
+		//validates user input
+		validateDimensions: function(){
+			var inp1 = document.getElementsByClassName('grid-size')[0].value;
+			var inp2 = document.getElementsByClassName('grid-size')[1].value;
+
+			if(inp1 && inp2 && inp1 > 0 && inp2 > 0){
+				document.getElementsByClassName('start-game')[0].removeAttribute('disabled');
+			}
+			else{
+				document.getElementsByClassName('start-game')[0].setAttribute('disabled', true);	
+			}
+		},
 		//returns total number of tiles
 		getGridCount: function(){
 			return game.model.gridCount;
@@ -60,16 +72,29 @@ var game = {
 		//Initializes the whole setup
 		startGame: function(isResumed){
 
+			setTimeout(function(){
+
+			}, 500);
+
 			if(!isResumed){
 				//clear local storage and table
 				if(typeof(Storage) !== 'undefined') {
-					console.log('reset');
 					localStorage.clear();
 					document.getElementById('game-board').innerHTML = '';
 					game.view.rowTemp = 0;
 					game.view.colTemp = 0;
 					game.view.tileTable = '';
 				}
+
+				//animations
+				setTimeout(function(){
+					document.getElementById('user-input-wrapper').classList.add('user-input-animate');
+					//document.getElementById('user-input-wrapper').style.marginTop = '50px';	
+				}, 200);
+				setTimeout(function(){
+					document.getElementsByClassName('tile-table')[0].classList.remove('hidden');	
+				}, 800);
+
 			}
 
 			game.model.rows = Number(document.getElementsByClassName('grid-size')[0].value);
@@ -77,7 +102,6 @@ var game = {
 			game.model.gridCount = game.model.rows * game.model.cols;
 
 			//TO-DO: handle empty NaN inputs, 1x1, 2x2 cases
-			//TO-DO: handle odd gridCount
 
 			game.view.createGameTable();
 			if(!isResumed){
@@ -95,6 +119,11 @@ var game = {
 						} 
 					}
 				}
+			}
+			if(game.model.distribution.length){
+				setTimeout(function(){
+					document.getElementsByClassName('tile-table')[0].classList.remove('hidden');	
+				}, 700);
 			}
 
 			//update local storage
@@ -125,6 +154,11 @@ var game = {
 						if(typeof(Storage) !== 'undefined') {
 							localStorage.setItem('revealedKeys', game.model.revealedKeys); 
 						}
+						this.revealedTemp = false;
+						this.revealedKeyTemp = null;
+						if(game.model.revealedKeys.length >= gridCount/2){
+							game.view.victory();	
+						}
 					}
 				}
 
@@ -142,6 +176,9 @@ var game = {
 						}
 
 						//TO-DO: notify user incase of victory and clear localstorage
+						if(game.model.revealedKeys.length >= gridCount/2){
+							game.view.victory();	
+						}
 					}
 					else{
 						thisObj.classList.add('revealed-tile-temp');
@@ -153,13 +190,15 @@ var game = {
 						for(var i = 0; i < gridCount; i++){
 							document.getElementsByClassName('tile')[i].classList.remove('revealed-tile-temp');
 						}
-					}, 500);	
+					}, 200);	
 				}
 			}
 		},
 
 		resume: function(){
 			if(typeof(Storage) !== 'undefined' && localStorage.length) {
+				/**/
+				document.getElementById('user-input-wrapper').style.top = '50px';
 				game.model.gridCount = Number(localStorage.gridCount);
 				game.model.cols = Number(localStorage.cols);
 				game.model.rows = Number(localStorage.rows);
@@ -188,7 +227,7 @@ var game = {
 		//Create an empty table of specified dimensions
 		createGameTable: function(){
 			this.tileTable = document.createElement('table');
-			this.tileTable.className = 'tile-table';
+			this.tileTable.className = 'tile-table hidden';
 			document.getElementById('game-board').appendChild(this.tileTable);
 		},
 
@@ -222,10 +261,16 @@ var game = {
 
 				tileWrapper.appendChild(tileKey);
 				tileWrapper.appendChild(tile);
-				tile.setAttribute('src', 'img/tile1.png');
+				tile.setAttribute('src', 'img/tile.png');
 				tile.setAttribute('onclick', 'game.controller.shouldRevealOrNot(this)');
 				cell.appendChild(tileWrapper);
 			}
 		},
+
+		//Notify user on victory and clear localstorage
+		victory: function(){
+			localStorage.clear();
+			document.getElementsByClassName('tile-table')[0].classList.add('tile-victory');
+		}
 	}
 };
