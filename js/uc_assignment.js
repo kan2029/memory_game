@@ -14,7 +14,7 @@ var game = {
 		revealedTemp: false,
 		revealedKeyTemp: null,
 
-		//validates user input
+		//Validates user input
 		validateDimensions: function(){
 			var inp1 = document.getElementsByClassName('grid-size')[0].value;
 			var inp2 = document.getElementsByClassName('grid-size')[1].value;
@@ -26,36 +26,39 @@ var game = {
 				document.getElementsByClassName('start-game')[0].setAttribute('disabled', true);	
 			}
 		},
-		//returns total number of tiles
+		//Returns total number of tiles
 		getGridCount: function(){
 			return game.model.gridCount;
 		},
 
-		//returns shuffled array from model
+		//Returns shuffled array from model
 		getDistributionArray: function(){
 			return game.model.distribution;
 		},
 		
-		//generates a random integer between 0 and limit-1
+		//Generates a random integer between 0 and limit-1
 		generateRandomNumber: function(limit){
 			return Math.floor(Math.random()*(limit));
 		},
 
-		//returns number of columns specified by user
+		//Returns number of columns specified by user
 		getColumns: function(){
 			return game.model.cols;
 		},
 
 		//Generate an array of length equal to gridCount with randomly distributed elements 1 to gridCount/2, repeated exactly twice
 		assignRandomKeys: function(){
-				game.model.numbers.length = 0;
-				game.model.revealedKeys.length = 0;
-				game.model.distribution.length = 0;
+
+			//Empty all arrays
+			game.model.numbers.length = 0;
+			game.model.revealedKeys.length = 0;
+			game.model.distribution.length = 0;
 			for(var i=1; i <= game.model.gridCount/2; i++){
 				game.model.numbers.push(i);
 				game.model.numbers.push(i);
 			}
 
+			//
 			this.gridCountTemp = game.model.gridCount;
 			for(var i=0; i < game.model.gridCount; i++){
 				var randIndex = this.generateRandomNumber(this.gridCountTemp);
@@ -82,7 +85,7 @@ var game = {
 					game.view.tileTable = '';
 				}
 
-				//animations
+				//Animations
 				setTimeout(function(){
 					document.getElementById('user-input-wrapper').classList.add('user-input-animate');
 					//document.getElementById('user-input-wrapper').style.marginTop = '50px';	
@@ -92,20 +95,16 @@ var game = {
 				}, 800);
 
 			}
-
 			game.model.rows = Number(document.getElementsByClassName('grid-size')[0].value);
 			game.model.cols = Number(document.getElementsByClassName('grid-size')[1].value);
 			game.model.gridCount = game.model.rows * game.model.cols;
-
-			//TO-DO: handle empty NaN inputs, 1x1, 2x2 cases
-
 			game.view.createGameTable();
 			if(!isResumed){
 				this.assignRandomKeys();
 			}
 			game.view.fillTiles();
 
-			//reveal tiles based on localstorage
+			//Reveal tiles based on localstorage
 			if(isResumed && game.model.revealedKeys && game.model.revealedKeys.length){
 				for(i=0; i < game.model.revealedKeys.length; i++){	
 					for(var j=0; j < game.model.gridCount; j++){
@@ -122,7 +121,7 @@ var game = {
 				}, 700);
 			}
 
-			//update local storage
+			//Update local storage
 			if(typeof(Storage) !== 'undefined') {
 				localStorage.setItem('rows', game.model.rows);
 				localStorage.setItem('cols', game.model.cols);
@@ -130,7 +129,7 @@ var game = {
 				localStorage.setItem('distribution', game.model.distribution);
 			}
 
-			//firefox table overflow issue
+			//Firefox table overflow issue fix
 			if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1 && game.model.cols >=10){
 			    document.getElementsByClassName('tile-table')[0].classList.add('firefox-overflow');
 			}
@@ -139,16 +138,15 @@ var game = {
 		shouldRevealOrNot: function(thisObj){
 
 			var gridCount = game.controller.getGridCount();
-
 			if(!thisObj.classList.contains('revealed-tile')){
 
-				//when 1st out of the 2 is selected
+				//When 1st out of the 2 is selected
 				if(!this.revealedTemp){
 					this.revealedTemp = true;
 					this.revealedKeyTemp = Number(thisObj.getAttribute('data-key'));
 					thisObj.classList.add('revealed-tile-temp');
 
-					//incase number of grids are odd and the odd one out comes up
+					//Incase number of grids are odd and the odd one out comes up
 					if(thisObj.getAttribute('data-key') == -1){
 						thisObj.classList.add('revealed-tile');
 						game.model.revealedKeys.push(-1); //-1 is used to represent this unique value
@@ -163,28 +161,29 @@ var game = {
 					}
 				}
 
-				//when 2nd out of the 2 is selected
+				//When 2nd out of the 2 is selected
 				else{
-					//incase of match
+					//Incase of match
 					if(thisObj.getAttribute('data-key') == this.revealedKeyTemp){
 						thisObj.classList.add('revealed-tile');
 						document.getElementsByClassName('revealed-tile-temp')[0].classList.add('revealed-tile');
 						game.model.revealedKeys.push(this.revealedKeyTemp);
 
-						//update local storage
+						//Update local storage
 						if(typeof(Storage) !== 'undefined') {
 							localStorage.setItem('revealedKeys', game.model.revealedKeys); 
 						}
 
-						//TO-DO: notify user incase of victory and clear localstorage
+						//Notify user incase of victory
 						if(game.model.revealedKeys.length >= gridCount/2){
 							game.view.victory();	
 						}
 					}
+
+					//Incase of mismatch
 					else{
 						thisObj.classList.add('revealed-tile-temp');
 					}
-
 					this.revealedTemp = false;
 					this.revealedKeyTemp = null;
 					setTimeout(function(){
@@ -198,7 +197,8 @@ var game = {
 
 		resume: function(){
 			if(typeof(Storage) !== 'undefined' && localStorage.length) {
-				/**/
+				
+				//Gather data from localstorage
 				document.getElementById('user-input-wrapper').style.top = '50px';
 				game.model.gridCount = Number(localStorage.gridCount);
 				game.model.cols = Number(localStorage.cols);
@@ -215,6 +215,8 @@ var game = {
 				}
 				document.getElementsByClassName('grid-size')[0].value = game.model.rows;
 				document.getElementsByClassName('grid-size')[1].value = game.model.cols;
+
+				//Resume game based on collected data
 				this.startGame('isResumed');
 			}
 		}
@@ -247,7 +249,6 @@ var game = {
 				var tileKey = document.createElement('span');
 				tileKey.classList.add('tile-key');
 				tileKey.innerHTML = distributionArray[i];
-
 
 				if(this.colTemp == 0){
 					var row = this.tileTable.insertRow(this.rowTemp);
